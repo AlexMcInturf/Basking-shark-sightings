@@ -1,0 +1,94 @@
+---
+title: "UK_BS_Sightings"
+output: html_document
+---
+
+```{r}
+dat <- read.csv("UK_bs_records.csv")
+head(dat)
+summary(dat) # see here that the years go from 1875 to 2017
+```
+First, I want to visualize the average number of individuals sighted at a time (for social behavior evidence)
+
+```{r}
+table(dat$Individual.count)
+class(dat$Individual.count)
+library(stringr)
+
+#found this function that extracts any extra non-numerical values
+numextract <- function(string){ 
+  str_extract(string, "\\-*\\d+\\.*\\d*")
+}
+dat$IndivCounts <- numextract(dat$Individual.count)
+table(dat$IndivCounts)
+head(dat$IndivCounts)
+dat$IndivCounts <- as.numeric(dat$IndivCounts, na.omit=TRUE)
+table(dat$IndivCounts)
+hist(dat$IndivCounts, breaks=1000)
+```
+Interestingly, most people only spotted one at a time. There were a few occasions with greater than 100 (up to 918...skeptical of this). Let's see if this varies by year/place
+
+```{r}
+summary(dat$State.Province)
+NI <- dat[dat$State.Province == "Northern Ireland",]
+head(NI)
+summary(NI)
+nrow(NI)
+
+Scotland <- dat[dat$State.Province == "Scotland",]
+nrow(Scotland)
+Man <- dat[dat$State.Province == "Isle of Man",]
+nrow(Man)
+
+# first looking at individual counts from each place
+NI$counts<- as.numeric(numextract(NI$Individual.count), na.omit=TRUE) # min = 1, max = 16
+Scotland$counts <- as.numeric(numextract(Scotland$Individual.count), na.omit=TRUE) # min = 1, max = 918
+Man$counts <- as.numeric(numextract(Man$Individual.count), na.omit=TRUE) 
+summary(Man$counts) # min = 1, max = 100
+
+hist(Scot$counts, breaks=6000) #just doing breaks around approximately how many sightings there were
+hist(Man$counts, breaks=4000)
+hist(NI$counts, breaks=100)
+hist()
+
+# now to visualize how these trends vary over time
+ggplot(data = dat, aes(x = factor(Year), y = IndivCounts, color = State.Province)) +       
+  geom_line(aes(group = factor(Year))) 
+
+# better to split it up
+ggplot(data = Scotland, aes(x = factor(Year), y = counts, color = State.Province)) +       
+  geom_line() 
+```
+Summary at this point: most sightings have occurred in Scotland, then Isle of Man, then significantly fewer in Northern Ireland
+
+
+Now let's look at trends in count data over year and month at each place and overall (note: these are MERGING hotspots, so we aren't necessarily looking at trends between hotspots, just regionally)
+
+```{r}
+# when are they most seen throughout the year?
+head(Scotland)
+hist(Scotland$Month) #most recorded during May - September, June/July are the prime months 
+hist(Man$Month) # here, May/July are prime months (Man = south of Scotland, so northern migration makes sense)
+hist(NI$Month) #May/June/July = prime time 
+
+# what years were best overall? 44 unique years of data in the entire dataset 
+nrow(dat)
+hist(dat$Year, freq=TRUE, breaks=44) #biggest peak in 2006-2010...what was happening?? 
+hist(Scotland$Year, breaks=44) # see peaks in 2005/2006 and 2013
+hist(Man$Year, breaks=44) # peaks in 2006/2007 and 2009
+hist(NI$Year, breaks=44) # recently, peaks in 2004-2006 
+```
+Summary: looks like 2006 was just a BIG YEAR in general for the sharks, and that the sharks sightings since 2000 seem to be maintained or increasing in Scotland, but are relatively decreasing or at least not peaking in Northern Ireland. The Isle of Man is somewhere in the middle. Does this suggest that the sharks are moving farther north? Or was there a concerted sightings effort going on at that time?
+
+Next step: are the sharks changing the months that they are sighted over time? 
+```{r}
+head(Scotland)
+ggplot(data=Scotland, aes(y=factor(Month), x = Year, color=factor(Month))) + geom_line()
+
+head(NI)
+ggplot(data=NI, aes(y=factor(Month), x = Year, color=factor(Month))) + geom_line()
+
+head(Man)
+ggplot(data=Man, aes(y=factor(Month), x = Year, color=factor(Month))) + geom_line()
+```
+Again, see that overall at each site, during the peak years (2006-2010), the sharks seem to stick around **at each site** longer than normal, arriving earlier and leaving later

@@ -1,0 +1,64 @@
+---
+title: "MH_temptrends"
+output: html_document
+---
+
+```{r}
+mhdat <- read.csv("MonthlyMHdata.csv")
+head(mhdat)
+
+#Now, a quick viz of temperature data over time 
+ggplot(data = mhdat, aes(x = factor(month), y = meant, color = year)) +       
+  geom_line(aes(group = year)) 
+
+# And sun over time 
+ggplot(data = mhdat, aes(x = factor(month), y = sun, color = year)) +       
+  geom_line(aes(group = year)) 
+
+# trying to see if we have any recent missing sun data
+ggplot(data = mhdat, aes(x = year, y = sun, color = month)) +       
+  geom_line(aes(group = month))
+
+tail(mhdat$sun, 100) # turns out we do! 
+```
+Looking to extract the months of May-September, and then July and August only because that's when they are most seen
+
+```{r}
+library(ggplot2)
+mhsight <- mhdat[(mhdat$month==5|mhdat$month==6|mhdat$month==7|mhdat$month==8),]
+# note to self: here the "|" represents the logical operator "or". You can't use c() here because R doesn't recognize that it can be any of those numbers
+mhsight
+
+ggplot(data = mhsight, aes(x = factor(year), y = meant, color = factor(month))) +       
+  geom_line(aes(group = factor(month)))
+
+mhsightrec.all <- mhsight[(mhsight$year==2006|mhsight$year==2007|mhsight$year==2008|mhsight$year==2009|mhsight$year==2009|mhsight$year==2010|mhsight$year==2011|mhsight$year==2012|mhsight$year==2013|mhsight$year==2014|mhsight$year==2015|mhsight$year==2016|mhsight$year==2017),]
+head(mhsightrec.all)
+
+ggplot(data = mhsightrec.all, aes(x = factor(year), y = meant, color = factor(month))) +       
+  geom_line(aes(group = factor(month))) + geom_point() + geom_vline(xintercept =6) 
+
+
+############################# Looking at July and August only ############
+mhsight2 <- mhdat[(mhdat$month==7|mhdat$month==8),]
+ggplot(data = mhsight2, aes(x = year, y = meant, color = factor(month))) +       
+  geom_line(aes(group = factor(month))) + geom_point()
+
+# now looking at days with sun
+ggplot(data = mhsight2, aes(x = year, y = sun, color = factor(month))) +       
+  geom_line(aes(group = factor(month))) + geom_point()
+
+# curious to zoom in and see the data from the past 12 years for July and August
+mhsightrec <- mhsight2[(mhsight2$year==2006|mhsight2$year==2007|mhsight2$year==2008|mhsight2$year==2009|mhsight2$year==2009|mhsight2$year==2010|mhsight2$year==2011|mhsight2$year==2012|mhsight2$year==2013|mhsight2$year==2014|mhsight2$year==2015|mhsight2$year==2016|mhsight2$year==2017),]
+head(mhsightrec)
+
+ggplot(data = mhsightrec, aes(x = factor(year), y = meant, color = factor(month))) +       
+  geom_line(aes(group = factor(month))) + geom_point() + geom_vline(xintercept =6) 
+
+# this vertical line marks a change in observed residence, from May-early June sightings to primarily July and August (source: Emmett)
+
+
+ggplot(data = mhsightrec, aes(x = year, y = sun, color = factor(month))) +       
+  geom_line(aes(group = factor(month))) + geom_point() ## note: we are missing some sun data from July/August in recent years :-(
+```
+Trends we are seeing based on the recent temperature data: July is warmer than August in 2010, 2013-2014. However, in 2012, 2015, 2016, and 2017, temperature in August tends to be higher (note that this is not SST, but just mean temperature)
