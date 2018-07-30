@@ -49,13 +49,12 @@ ggplot(data = mhsight2, aes(x = year, y = sun, color = factor(month))) +
   geom_line(aes(group = factor(month))) + geom_point()
 
 # curious to zoom in and see the data from the past 12 years for July and August
-mhsightrec <- mhsight2[(mhsight2$year==2006|mhsight2$year==2007|mhsight2$year==2008|mhsight2$year==2009|mhsight2$year==2009|mhsight2$year==2010|mhsight2$year==2011|mhsight2$year==2012|mhsight2$year==2013|mhsight2$year==2014|mhsight2$year==2015|mhsight2$year==2016|mhsight2$year==2017),]
+mhsightrec <- mhsight2[(mhsight2$year==2004|mhsight2$year==2005|mhsight2$year==2006|mhsight2$year==2007|mhsight2$year==2008|mhsight2$year==2009|mhsight2$year==2009|mhsight2$year==2010|mhsight2$year==2011|mhsight2$year==2012|mhsight2$year==2013|mhsight2$year==2014|mhsight2$year==2015|mhsight2$year==2016|mhsight2$year==2017),]
 head(mhsightrec)
 
 ggplot(data = mhsightrec, aes(x = factor(year), y = meant, color = factor(month))) +       
-  geom_line(aes(group = factor(month))) + geom_point() + geom_vline(xintercept =6) 
-
-# this vertical line marks a change in observed residence, from May-early June sightings to primarily July and August (source: Emmett)
+  geom_line(aes(group = factor(month))) + geom_point() + geom_vline(xintercept =c(3,8), color=c("black", "red"))
+# the red vertical line marks a change in observed residence, from May-early June sightings to primarily July and August (source: Emmett). The black line marks a change in sightings (2006 = BIG sightings year across all of Ireland/UK)
 
 
 ggplot(data = mhsightrec, aes(x = year, y = sun, color = factor(month))) +       
